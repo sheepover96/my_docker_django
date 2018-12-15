@@ -1,32 +1,48 @@
-version: '2'
+version: '3.3'
 services:
   web:
-   restart: always
-   build: ./app
-   expose:
-     - "5000"
-   links:
-     - postgres:postgres
-   volumes:
-     - ./app:/usr/src/app
-     - ./app/static/:/usr/src/app/static
-   command: uwsgi --socket :5000 --module ruroufumi.wsgi
+    restart: always
+    build: ./app
+    env_file: .env
+    environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - "5000"
+    links:
+      - postgres:postgres
+    volumes:
+      - ./app:/usr/src/app
+      - ./app/static/:/usr/src/app/static
+    command: uwsgi --socket :5000 --module app_name.wsgi
   nginx:
     restart: always
     image: nginx
+    build: ./nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - "./nginx/:/etc/nginx/"
-    volumes_from:
-      - web
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./app/static/:/var/www/static
     links:
       - web:web
   postgres:
-   image: postgres
-   build: ./postgres
-   ports:
+    restart: always
+    image: postgres
+    build: ./postgres
+    environment:
+       POSTGRES_USER: ${POSTGRES_USER}
+       POSTGRES_DB: ${POSTGRES_DB}
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - "dbdata:/var/lib/postgresql/data" 
+    ports:
      - "5432:5432"
+volumes:
+  dbdata:
+#    image: postgres
   #webpack:
   #  build:
   #    context: ./webpack

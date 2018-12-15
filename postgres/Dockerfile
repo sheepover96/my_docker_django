@@ -5,6 +5,6 @@ ENV LANG ja_JP.utf8
 
 RUN mkdir /usr/src/init
 COPY ./init_db.sql /usr/src/init 
-ENV POSTGRES_USER postgres
-ENV POSTGRES_DB postgres 
+#ENV POSTGRES_USER postgres
+#ENV POSTGRES_DB postgres 
 #RUN psql -f /usr/src/init/init_db.sql -U postgres
